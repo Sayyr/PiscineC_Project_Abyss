@@ -1,5 +1,6 @@
 #pragma once
 #include <stdbool.h>
+#include "input.h"
 
 typedef struct {
     float x, y;      // position du joueur
@@ -17,7 +18,7 @@ typedef struct {
     Map    map;
 } Game;
 
-typedef struct Input Input; // forward decl.
+// typedef struct Input Input; // forward decl.
 
 void game_init(Game* g);
 void game_update(Game* g, const Input* in);

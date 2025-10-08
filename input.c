@@ -1,5 +1,5 @@
 #include "input.h"
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 Input input_read(bool* running) {
     Input in = {0};
