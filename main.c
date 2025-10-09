@@ -5,6 +5,7 @@
 #include "game.h"
 #include "input.h"
 #include "render.h"
+#include "enemy.h"
 
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER);
@@ -15,6 +16,9 @@ int main(int argc, char* argv[]) {
 
     Game game = {0};
     game_init(&game);                 // État initial (player, map…)
+
+    // Initialise l’ennemi (exemple)
+    // enemy_init(&game.enemy, 160, 160);
 
     bool running = true;
     while (running) {

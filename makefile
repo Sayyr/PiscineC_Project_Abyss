@@ -1,5 +1,5 @@
 CC = gcc
-SRC = main.c game.c input.c render.c
+SRC = main.c game.c input.c render.c pathfinding.c
 EXE = crawler.exe
 
 # À ADAPTER selon ton installation SDL2 :
