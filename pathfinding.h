@@ -1,7 +1,6 @@
 #pragma once
-#include "game.h"
 typedef struct Map Map;
-typedef struct Player Player;
+
 #define MAX_PATH 64
 
 typedef struct { int x, y; } Node;

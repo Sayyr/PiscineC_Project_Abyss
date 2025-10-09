@@ -1,3 +1,4 @@
+#include "game.h"
 #include "pathfinding.h"
 #include <stdlib.h>
 
