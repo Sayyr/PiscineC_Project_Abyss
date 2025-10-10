@@ -5,14 +5,11 @@
 
 #include "map.h"
 #include "input.h" // doit exister et définir 'typedef struct Input Input;'
-
-// Player défini avec tag (évite les conflits avec forward-decls)
 typedef struct Player {
     float x, y, vx, vy;
     int hp;
 } Player;
 
-// include enemy.h après que Map et Player soient connus
 #include "enemy.h"
 
 typedef struct {
@@ -22,6 +19,6 @@ typedef struct {
     // ...autres champs...
 } Game;
 
-void game_init(Game* g);
-void game_update(Game* g, const Input* in);
-void game_shutdown(Game* g);
+void game_init(Game* game);
+void game_update(Game* game, const Input* in);
+void game_shutdown(Game* game);

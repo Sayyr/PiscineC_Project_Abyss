@@ -9,6 +9,7 @@ typedef struct EnemyVTable {
     void (*render)(Enemy* self, SDL_Renderer* ren);
 } EnemyVTable;
 
+typedef enum {WANDER, SEARCH, TRAQUE} EnemyState;
 struct Enemy {
     float x, y;
     int hp;
@@ -16,6 +17,7 @@ struct Enemy {
     int has_last_player_pos;
     int wander_target_x, wander_target_y;
     const EnemyVTable* vtable;
+    EnemyState state;
 };
 
 void enemy_init(Enemy* e, float x, float y);

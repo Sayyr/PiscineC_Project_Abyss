@@ -59,6 +59,7 @@
   "files.associations": {
     "*.dbclient-js": "javascript",
     "*.asm": "platformio-debug.asm",
-    "sdl.h": "c"
+    "sdl.h": "c",
+    "stdbool.h": "c"
   }
 }

@@ -1,6 +1,7 @@
 #include "game.h"
 #include "pathfinding.h"
 #include <stdlib.h>
+#include <math.h>
 
 int heuristic(int x0, int y0, int x1, int y1) {
     return abs(x1 - x0) + abs(y1 - y0);
