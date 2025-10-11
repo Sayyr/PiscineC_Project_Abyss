@@ -1,0 +1,5 @@
+patch les mouvements des ennemeis
+ajouter plusieurs ennemeis
+avoir une caméra qui suit le joueur
+pouvoir aller dans plusieurs niveaux
+pouvoir obtenir des objets via des pnjs ou des actions

@@ -9,7 +9,7 @@ typedef struct EnemyVTable {
     void (*render)(Enemy* self, SDL_Renderer* ren);
 } EnemyVTable;
 
-typedef enum {WANDER, SEARCH, TRAQUE} EnemyState;
+typedef enum {WANDER, SEARCH, TRAQUE, STAY} EnemyState;
 struct Enemy {
     float x, y;
     int hp;

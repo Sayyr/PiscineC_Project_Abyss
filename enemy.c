@@ -25,8 +25,8 @@ void steer_to_next_on_path(Enemy* e, const Node* path, int path_len, float speed
 }
 
 static void enemy_update_default(Enemy* e, const Map* map, const Player* player) {
-    const float acquire_radius = 128.0f;    // voit / acquiert la cible
-    const float arrive_eps     = 4.0f;      // “arrivé” à un point
+    const float acquire_radius = 128.0f;               // voit / acquiert la cible
+    const float arrive_eps     = 4.0f;                 // “arrivé” à un point
     const float speed          = 60.0f * (1.0f/60.0f); // 1 px/frame (remplace plus tard par speed*dt)
 
     // Distances utiles
@@ -91,6 +91,8 @@ static void enemy_update_default(Enemy* e, const Map* map, const Player* player)
             e->has_last_player_pos = 1;
             e->state = TRAQUE;
             break;
+        } else {
+            e->state = WANDER;
         }
 
         if (ldist > arrive_eps) {
