@@ -19,7 +19,7 @@ void player_tick_cooldowns(Player* p, float dt) {
     if (p->i_frames > 0) p->i_frames -= dt;
 }
 
-static const AbilityDef* ability_def(AbilityId id); // depuis ta “DB” (table statique ou fichier)
+static const AbilityDef* ability_def(AbilityId id); // depuis la “DB” (fichier)
 static const ItemDef*    item_def(int item_id);     // idem
 
 void player_apply_cmd(Player* p, const PlayerCmd* c, float dt) {
@@ -62,14 +62,14 @@ void player_apply_cmd(Player* p, const PlayerCmd* c, float dt) {
             const ItemDef* d = item_def(used.item_id);
             // appliquer effets simples :
             p->stats.max_hp += d->hp_delta > 0 ? 0 : 0; // si potion perma, sinon applique à une ressource courante
-            // si tu gères HP courants, applique sur `hp_current` (à ajouter dans Stats ou à part)
+            // si on gères HP courants, applique sur `hp_current` (à ajouter dans Stats ou à part)
         }
     }
 
     // Gravité + intégration
-    p->vy += 900.0f * dt;           // gravité simple
-    p->x  += p->vx * dt;
-    p->y  += p->vy * dt;
+    // p->vy += 900.0f * dt;           // gravité simple
+    // p->x  += p->vx * dt;
+    // p->y  += p->vy * dt;
 
     // collisions sol/murs ici (tilemap) → ajuste p->x/p->y et flags (on_ground)
     // p->state = (fabsf(p->vx) > 1.f && p->on_ground)? PST_RUN : PST_IDLE;
