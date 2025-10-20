@@ -1,5 +1,5 @@
-#include "game.h"        // full Player and Map definitions
-#include "enemy.h"
+// #include "game.h"        // full Player and Map definitions
+#include "entities.h"
 #include "pathfinding.h"
 #include <stdlib.h>
 #include <math.h>

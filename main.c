@@ -1,35 +1,70 @@
-#define SDL_MAIN_HANDLED
-
-#include <SDL2/SDL.h>
-#include <stdbool.h>
 #include "game.h"
-#include "input.h"
-#include "render.h"
-#include "enemy.h"
+#include "state/state_hub.h"
+#include "state/state_explo.h"
+#include "state/state_fight.h"
 
-int main(int argc, char* argv[]) {
-    SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER);
-    SDL_Window* win = SDL_CreateWindow("Crawler",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 960, 540, 0);
-    SDL_Renderer* ren = SDL_CreateRenderer(win, -1,
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+int main(void) {
+    Game g = {0};
+    if (!game_init(&g, "Abyss", 960, 540)) return 1;
 
-    Game game = {0};
-    game_init(&game);                 // État initial (player, map…)
+    // état initial
+    g.state = g.next_state = GS_HUB;
+    hub_enter(&g, &g.hub);
 
-    // Initialise l’ennemi (exemple)
-    // enemy_init(&game.enemy, 160, 160);
+    Uint64 last = SDL_GetPerformanceCounter();
+    const double freq = (double)SDL_GetPerformanceFrequency();
 
-    bool running = true;
-    while (running) {
-        Input in = input_read(&running);      // 1) événements > actions
-        game_update(&game, (const Input*)&in);// 2) logique
-        render_frame(ren, &game);             // 3) dessin
+    while (g.running) {
+        // dt
+        Uint64 now = SDL_GetPerformanceCounter();
+        float dt = (float)((now - last) / freq);
+        if (dt > 0.25f) dt = 0.25f;
+        last = now;
+
+        // events globaux
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) g.running = false;
+        }
+
+        // UPDATE selon l'état courant
+        switch (g.state) {
+            case GS_HUB:         hub_update(&g, g.hub, dt);       break;
+            case GS_EXPLORATION: explo_update(&g, g.explo, dt);   break;
+            case GS_COMBAT:      fight_update(&g, g.fight, dt); break;
+        }
+
+        // TRANSITION centralisée (leave -> enter)
+        if (g.next_state != g.state) {
+            switch (g.state) {
+                case GS_HUB:         hub_leave(&g, &g.hub);       break;
+                case GS_EXPLORATION: explo_leave(&g, &g.explo);   break;
+                case GS_COMBAT:      fight_leave(&g, &g.fight); break;
+            }
+            g.state = g.next_state;
+            switch (g.state) {
+                case GS_HUB:         hub_enter(&g, &g.hub);       break;
+                case GS_EXPLORATION: explo_enter(&g, &g.explo);   break;
+                case GS_COMBAT:      fight_enter(&g, &g.fight); break;
+            }
+        }
+
+        // RENDER
+        switch (g.state) {
+            case GS_HUB:         hub_render(&g, g.hub);       break;
+            case GS_EXPLORATION: explo_render(&g, g.explo);   break;
+            case GS_COMBAT:      fight_render(&g, g.fight); break;
+        }
+        SDL_RenderPresent(g.ren);
     }
 
-    game_shutdown(&game);
-    SDL_DestroyRenderer(ren);
-    SDL_DestroyWindow(win);
-    SDL_Quit();
+    // leave propre de l'état courant (si besoin)
+    switch (g.state) {
+        case GS_HUB:         hub_leave(&g, &g.hub);       break;
+        case GS_EXPLORATION: explo_leave(&g, &g.explo);   break;
+        case GS_COMBAT:      fight_leave(&g, &g.fight); break;
+    }
+
+    game_shutdown(&g);
     return 0;
 }

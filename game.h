@@ -1,24 +1,30 @@
 #pragma once
+#include <include/SDL2/SDL.h>
 #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 
-#include "map.h"
-#include "input.h" // doit exister et définir 'typedef struct Input Input;'
-typedef struct Player {
-    float x, y, vx, vy;
-    int hp;
-} Player;
+typedef enum { GS_HUB, GS_EXPLORATION, GS_COMBAT } GameState;
 
-#include "enemy.h"
+// Fwds des contextes d'états (définis dans leurs .h)
+typedef struct Hub    Hub;
+typedef struct Explo  Explo;
+typedef struct Fight Fight;
 
 typedef struct {
-    Map map;
-    Player player;
-    Enemy enemy;
-    // ...autres champs...
+    SDL_Window*   win;
+    SDL_Renderer* ren;
+    bool          running;
+
+    GameState state;      // état courant
+    GameState next_state; // demande de transition (ou = state si rien)
+
+    // Contextes d'états (possédés par Game, passés aux fonctions des états)
+    Hub*    hub;
+    Explo*  explo;
+    Fight* fight;
 } Game;
 
-void game_init(Game* game);
-void game_update(Game* game, const Input* in);
-void game_shutdown(Game* game);
+// Transition à demander depuis un état (jamais modifier Game.state directement)
+static inline void game_change_state(Game* g, GameState ns) { g->next_state = ns; }
+
+bool game_init(Game* g, const char* title, int w, int h);
+void game_shutdown(Game* g);

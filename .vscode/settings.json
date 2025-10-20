@@ -60,6 +60,9 @@
     "*.dbclient-js": "javascript",
     "*.asm": "platformio-debug.asm",
     "sdl.h": "c",
-    "stdbool.h": "c"
-  }
+    "stdbool.h": "c",
+    "render_explo.h": "c",
+    "sddl.h": "c"
+  },
+  "makefile.configureOnOpen": false
 }

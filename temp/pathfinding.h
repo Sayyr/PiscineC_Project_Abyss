@@ -1,7 +1,7 @@
 #pragma once
 typedef struct Map Map;
 
-#define MAX_PATH 64
+#define MAX_PATH 256
 
 typedef struct { int x, y; } Node;
 

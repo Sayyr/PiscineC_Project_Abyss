@@ -1,0 +1,33 @@
+#pragma once
+#include <SDL.h>
+#include "map.h"
+#include "player.h"
+#include "state/render/render_common.h"
+
+typedef enum { WANDER, TRAQUE, SEARCH } EnemyState;
+
+typedef struct EnemyVTable EnemyVTable;
+typedef struct Enemy {
+    float x, y;
+    int   hp;
+    EnemyState state;
+
+    // mémoire de cible
+    float last_player_x, last_player_y;
+    int   has_last_player_pos;
+
+    // wander
+    int   wander_target_x, wander_target_y;
+
+    const EnemyVTable* vtable;
+} Enemy;
+
+struct EnemyVTable {
+    void (*update)(Enemy*, const Map*, const Player*);
+    void (*render)(Enemy*, SDL_Renderer*);
+};
+
+void enemy_init  (Enemy* e, float x, float y);
+void enemy_update(Enemy* e, const Map* map, const Player* player);
+void enemy_render(Enemy* e, SDL_Renderer* ren);
+void enemy_wander(Enemy* e, const Map* map);
