@@ -1,7 +1,9 @@
 #pragma once
 #include "game.h"
+#include "../map.h"
+#include "gen/entities.h"
 
-// Mini map+player pour la démo (tu peux brancher ton map.h existant)
+// Mini map+player pour la démo
 typedef struct {
     int w, h;
     const char* data; // '#' mur, '.' sol
@@ -14,6 +16,8 @@ typedef struct {
 typedef struct Explo {
     DemoMap    map;
     DemoPlayer player;
+    Enemy      ennemies[4];
+    int        enemy_count;
 } Explo;
 
 void explo_enter (Game* g, Explo** ps);

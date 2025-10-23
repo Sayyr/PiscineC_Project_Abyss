@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL.h>
+#include <include/SDL2/SDL.h>
 #include "map.h"
 #include "player.h"
 #include "state/render/render_common.h"

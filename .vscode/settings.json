@@ -62,7 +62,8 @@
     "sdl.h": "c",
     "stdbool.h": "c",
     "render_explo.h": "c",
-    "sddl.h": "c"
+    "sddl.h": "c",
+    "pathfinding.h": "c"
   },
   "makefile.configureOnOpen": false
 }

@@ -3,7 +3,8 @@
 #include "state/state_explo.h"
 #include "state/state_fight.h"
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc; (void)argv;
     Game g = {0};
     if (!game_init(&g, "Abyss", 960, 540)) return 1;
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "map.h"
 typedef struct Map Map;
 
 #define MAX_PATH 256

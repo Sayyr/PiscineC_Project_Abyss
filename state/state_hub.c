@@ -1,6 +1,6 @@
 #include "state_hub.h"
 #include "map.h"
-#include <SDL.h>
+#include <../../include/SDL2/SDL.h>
 #include <stdlib.h>
 #include <math.h>
 
