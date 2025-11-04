@@ -3,7 +3,7 @@ typedef struct {
     int lvl;
     int xp;
     float str, agi, psy;   // stats de base
-    float max_hp, max_mp;
+    float max_hp, max_mp, max_ox;
     float atk, def, crit, move_speed; // dérivées
 } Stats;
 

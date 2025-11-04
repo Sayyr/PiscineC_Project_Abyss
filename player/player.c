@@ -5,7 +5,7 @@
 void player_init(Player* p) {
     memset(p, 0, sizeof *p);
     p->facing = +1;
-    p->stats = (Stats){ .lvl=1, .str=5, .agi=5, .psy=5, .max_hp=100, .max_mp=30 };
+    p->stats = (Stats){ .lvl=1, .str=5, .agi=5, .psy=5, .max_hp=100, .max_mp=30, .max_ox=100 };
     stats_compute_derived(&p->stats);
     // capacités de départ :
     p->abilities[AB_DASH].id = AB_DASH; p->abilities[AB_DASH].unlocked = 0; // à débloquer
