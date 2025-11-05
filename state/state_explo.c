@@ -13,12 +13,12 @@ static const char TEST_MAP[] =
 "#...............................#"
 "#################################";
 
-// static int map_is_wall(const DemoMap* m, int tx, int ty) {
+// static int map_is_wall(const Map* m, int tx, int ty) {
 //     if (tx < 0 || ty < 0 || tx >= m->w || ty >= m->h) return 1;
 //     return m->data[ty * m->w + tx] == '#';
 // }
 
-static int is_valid_spawn(const DemoMap* m, int tx, int ty, float px, float py) {
+static int is_valid_spawn(const Map* m, int tx, int ty, float px, float py) {
     if (map_is_wall(m, tx, ty)) return 0;
     int px_tile = (int)(px / 32);
     int py_tile = (int)(py / 32);

@@ -2,20 +2,21 @@
 #include "game.h"
 #include "../map.h"
 #include "gen/entities.h"
+#include "player/player.h"
 
 // Mini map+player pour la démo
-typedef struct {
-    int w, h;
-    const char* data; // '#' mur, '.' sol
-} DemoMap;
+// typedef struct {
+//     int w, h;
+//     const char* data; // '#' mur, '.' sol
+// } Map;
 
-typedef struct {
-    float x, y;
-} DemoPlayer;
+// typedef struct {
+//     float x, y;
+// } DemoPlayer;
 
 typedef struct Explo {
-    DemoMap    map;
-    DemoPlayer player;
+    Map    map;
+    Player player;
     Enemy      ennemies[4];
     int        enemy_count;
 } Explo;
