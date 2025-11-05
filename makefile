@@ -24,9 +24,9 @@ SDL2_LIB     := C:/SDL2/lib
 
 CFLAGS  := -Wall -Wextra -std=c11 -O2 -MMD -MP \
            -I. -Istate -Istate/render -Iplayer -Igen \
-           -I$(SDL2_INCLUDE)
-# Sous MinGW: pas besoin de -lSDL2main si vous avez int main(...)
-LDFLAGS := -L$(SDL2_LIB) -lSDL2
+           $(shell pkg-config --cflags sdl2)
+           
+LDFLAGS := $(shell pkg-config --libs sdl2)
 
 .PHONY: all clean run printsrc
 
