@@ -11,6 +11,7 @@ typedef struct Enemy {
     float x, y;
     int   hp;
     EnemyState state;
+    int dead;
 
     // mémoire de cible
     float last_player_x, last_player_y;
@@ -20,12 +21,18 @@ typedef struct Enemy {
     int   wander_target_x, wander_target_y;
 
     const EnemyVTable* vtable;
+    Inventory inv;
 } Enemy;
 
 struct EnemyVTable {
     void (*update)(Enemy*, const Map*, const Player*);
     void (*render)(Enemy*, SDL_Renderer*);
 };
+
+typedef struct Chest {
+    Inventory inv;
+    int opened;
+} Chest;
 
 void enemy_init  (Enemy* e, float x, float y);
 void enemy_update(Enemy* e, const Map* map, const Player* player);
