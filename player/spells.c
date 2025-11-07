@@ -25,14 +25,13 @@ static const AbilityDef ABIL_TABLE[] = {
         .mana_cost=3.f, .power=25.f, .cooldown=3.5f, .cast_time=0.2f
     },
 };
-_Static_assert(ARRLEN(ABIL_TABLE) == AB_COUNT,
-               "ABIL_TABLE size must match AB_COUNT");
+_Static_assert(ARRLEN(ABIL_TABLE) == AB_COUNT, "ABIL_TABLE size must match AB_COUNT");
 
 const AbilityDef* ability_def(AbilityId id) {
     for (int i = 0; i < AB_COUNT; ++i) {
         if (ABIL_TABLE[i].id == id) return &ABIL_TABLE[i];
     }
-    return;
+    return 0;
 }
 
 size_t ability_count(void) {
