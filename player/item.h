@@ -1,4 +1,6 @@
 #pragma once
+#include <stddef.h>
+
 typedef enum { IT_CONSUMABLE, IT_WEAPON, IT_ARMOR, IT_KEY, IT_TRESOR } ItemType;
 
 typedef struct {

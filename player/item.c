@@ -2,6 +2,7 @@
 #include <stddef.h> //pour le size_t parce que franchement j'ai commencé mon jeu avec l'idée qu'il soit en 64bits
 // et si j'utilise un unsigned int alors le jeu pourrait que être en 32bits, parce qu'on pourrait pas avoir
 // plussieurs milliers ou millions d'éléments (jsp la limitation réelle en vrai, mais dans le doute, je prends size_t)
+#define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0])) //je sais plus pourquoi, mais bref
 
 // test simple, plus tard en faire un JSON
 static const ItemDef item_db[] = {
