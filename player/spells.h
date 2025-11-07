@@ -15,3 +15,5 @@ typedef struct {
     float cd_left;     // temps restant sur le cooldown
     int unlocked;      // 0/1
 } AbilityState;
+
+const AbilityDef* ability_def(AbilityId id);
