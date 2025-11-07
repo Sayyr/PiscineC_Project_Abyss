@@ -1,5 +1,5 @@
 #pragma once
-typedef enum { AB_FIREBALL, AB_DASH, AB_DOUBLEJUMP, AB_COUNT, ABIL_STRIKE } AbilityId;
+typedef enum { AB_NONE = 0, AB_FIREBALL, AB_DASH, AB_DOUBLEJUMP, AB_STRIKE, AB_COUNT } AbilityId;
 
 typedef struct {
     AbilityId id;
@@ -7,11 +7,11 @@ typedef struct {
     float mana_cost;
     float power; //puissance
     float cooldown;    // secondes
-    float cast_time;   // si canalisation
+    float cast_time;   // si canalisation, si 0 c'est que c'est instant (bah oe logik)
 } AbilityDef;
 
 typedef struct {
     AbilityId id;
     float cd_left;     // temps restant sur le cooldown
-    int unlocked;      // 0/1 (Metroidvania: capacités acquises)
+    int unlocked;      // 0/1
 } AbilityState;
