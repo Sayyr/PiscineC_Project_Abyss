@@ -1,4 +1,6 @@
 #include "player.h"
+#include "items.h"
+#include "spells.h"
 #include <string.h>
 #include <math.h>
 
@@ -19,8 +21,8 @@ void player_tick_cooldowns(Player* p, float dt) {
     if (p->i_frames > 0) p->i_frames -= dt;
 }
 
-static const AbilityDef* ability_def(AbilityId id); // depuis la “DB” (fichier)
-static const ItemDef*    item_def(int item_id);     // idem
+// static const AbilityDef* ability_def(AbilityId id); // depuis la “DB” (fichier)
+// static const ItemDef*    item_def(int item_id);     // idem
 
 void player_apply_cmd(Player* p, const PlayerCmd* c, float dt) {
     // Mouvement horizontal

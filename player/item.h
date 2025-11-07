@@ -9,8 +9,8 @@ typedef struct {
     int  stackable;      // 0/1
     int  max_stack;      // ex: x pour ressources, 1 pour arme par exemple
     int  consumable; 
-    float hp_delta, mp_delta;   // potion…
-    float atk_bonus, def_bonus; // arme/armure…
+    float hp_delta, mp_delta;   // +/- vie/mana/oxygène
+    float defense, attack; // arme/armure
 } ItemDef;
 
 typedef struct {
@@ -19,3 +19,4 @@ typedef struct {
 } ItemStack;
 
 const ItemDef* item_def(int id);
+size_t item_count(void);
