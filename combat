@@ -1,0 +1,504 @@
+#include <SDL.h>
+#include <SDL_ttf.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdbool.h>
+#include <string.h>
+
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+#define TILE_SIZE 40
+#define MAP_WIDTH 20
+#define MAP_HEIGHT 15
+
+typedef struct {
+    char nom[50];
+    int pv;
+    int pv_max;
+    int vitesse;
+    int attaque;
+    int defense;
+    char recompense[50];
+} Mob;
+
+typedef struct {
+    int x, y;
+    int pv;
+    int pv_max;
+    int vitesse;
+    int force;
+    int defense;
+} Joueur;
+
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+TTF_Font* font = NULL;
+Joueur joueur;
+Mob mobs[2];
+int mob_actif = -1;
+
+char menu_principal[3];
+char attaques[4];
+char objets[3];
+
+char message_combat[200] = "";
+
+void init_sdl() {
+    SDL_Init(SDL_INIT_VIDEO);
+    TTF_Init();
+    window = SDL_CreateWindow("Systeme de Combat Test", 
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+        SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    font = TTF_OpenFont("arial.ttf", 24);
+    if (!font) {
+        font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24);
+    }
+}
+
+void init_joueur() {
+    joueur.x = 5;
+    joueur.y = 5;
+    joueur.pv = 100;
+    joueur.pv_max = 100;
+    joueur.vitesse = 8;
+    joueur.force = 10;
+    joueur.defense = 5;
+}
+
+void init_mobs() {
+    strcpy(mobs[0].nom, "3arbi Normal");
+    mobs[0].pv = 50;
+    mobs[0].pv_max = 50;
+    mobs[0].vitesse = 6;
+    mobs[0].attaque = 8;
+    mobs[0].defense = 3;
+    strcpy(mobs[0].recompense, "20 pieces d'or");
+    
+    strcpy(mobs[1].nom, "3arbi Rapide");
+    mobs[1].pv = 80;
+    mobs[1].pv_max = 80;
+    mobs[1].vitesse = 5;
+    mobs[1].attaque = 12;
+    mobs[1].defense = 6;
+    strcpy(mobs[1].recompense, "Epee en fer");
+}
+
+void init_tableaux() {
+    menu_principal[0] = 'A';
+    menu_principal[1] = 'O';
+    menu_principal[2] = 'F';
+    
+    attaques[0] = '1';
+    attaques[1] = '2';
+    attaques[2] = '3';
+    attaques[3] = '4';
+    
+    objets[0] = 'P';
+    objets[1] = 'S';
+    objets[2] = 'B';
+}
+
+// ===== AFFICHAGE =====
+
+void dessiner_rectangle(int x, int y, int w, int h, int r, int g, int b, int a) {
+    SDL_Rect rect = {x, y, w, h};
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_RenderFillRect(renderer, &rect);
+}
+
+void dessiner_bordure(int x, int y, int w, int h, int r, int g, int b) {
+    SDL_Rect rect = {x, y, w, h};
+    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+    SDL_RenderDrawRect(renderer, &rect);
+}
+
+void dessiner_texte(const char* texte, int x, int y, SDL_Color couleur) {
+    if (!font || !texte) return;
+    SDL_Surface* surface = TTF_RenderText_Solid(font, texte, couleur);
+    if (!surface) return;
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect dest = {x, y, surface->w, surface->h};
+    SDL_RenderCopy(renderer, texture, NULL, &dest);
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+}
+
+void dessiner_barre_vie(int x, int y, int pv_actuel, int pv_max, int largeur) {
+    dessiner_rectangle(x, y, largeur, 20, 0, 0, 0, 255);
+    
+    float ratio = (float)pv_actuel / pv_max;
+    int largeur_vie = (int)(largeur * ratio);
+    
+    if (ratio > 0.5f) {
+        dessiner_rectangle(x, y, largeur_vie, 20, 0, 255, 0, 255);
+    } else if (ratio > 0.2f) {
+        dessiner_rectangle(x, y, largeur_vie, 20, 255, 165, 0, 255);
+    } else {
+        dessiner_rectangle(x, y, largeur_vie, 20, 255, 0, 0, 255);
+    }
+    
+    dessiner_bordure(x, y, largeur, 20, 255, 255, 255);
+    
+    char pv_text[50];
+    sprintf(pv_text, "%d / %d", pv_actuel, pv_max);
+    SDL_Color blanc = {255, 255, 255, 255};
+    dessiner_texte(pv_text, x + 5, y + 2, blanc);
+}
+
+void dessiner_map() {
+    SDL_SetRenderDrawColor(renderer, 34, 139, 34, 255);
+    SDL_RenderClear(renderer);
+    
+    SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
+    for (int i = 0; i <= MAP_WIDTH; i++) {
+        SDL_RenderDrawLine(renderer, i * TILE_SIZE, 0, i * TILE_SIZE, SCREEN_HEIGHT);
+    }
+    for (int i = 0; i <= MAP_HEIGHT; i++) {
+        SDL_RenderDrawLine(renderer, 0, i * TILE_SIZE, SCREEN_WIDTH, i * TILE_SIZE);
+    }
+    
+    dessiner_rectangle(joueur.x * TILE_SIZE + 5, joueur.y * TILE_SIZE + 5, 
+                       TILE_SIZE - 10, TILE_SIZE - 10, 0, 0, 255, 255);
+    
+    dessiner_rectangle(10 * TILE_SIZE + 5, 7 * TILE_SIZE + 5, 
+                       TILE_SIZE - 10, TILE_SIZE - 10, 255, 0, 0, 255);
+    dessiner_rectangle(15 * TILE_SIZE + 5, 10 * TILE_SIZE + 5, 
+                       TILE_SIZE - 10, TILE_SIZE - 10, 255, 0, 0, 255);
+    
+    dessiner_rectangle(10, 10, 200, 60, 0, 0, 0, 200);
+    dessiner_barre_vie(20, 20, joueur.pv, joueur.pv_max, 180);
+}
+
+void gerer_input_map(SDL_Event* e) {
+    if (e->type == SDL_KEYDOWN) {
+        if (e->key.keysym.sym == SDLK_UP) {
+            joueur.y--;
+        }
+        if (e->key.keysym.sym == SDLK_DOWN) {
+            joueur.y++;
+        }
+        if (e->key.keysym.sym == SDLK_LEFT) {
+            joueur.x--;
+        }
+        if (e->key.keysym.sym == SDLK_RIGHT) {
+            joueur.x++;
+        }
+        
+        if (joueur.x < 0) joueur.x = 0;
+        if (joueur.x >= MAP_WIDTH) joueur.x = MAP_WIDTH - 1;
+        if (joueur.y < 0) joueur.y = 0;
+        if (joueur.y >= MAP_HEIGHT) joueur.y = MAP_HEIGHT - 1;
+    }
+}
+
+// ===== SYSTEME DE HAGRAH =====
+
+void lancer_combat(int index_mob) {
+    Mob* mob = &mobs[index_mob];
+    int gagnant = 0;
+    int tour = 0;
+    int index_menu = 0;
+    int menu_actif = 0;
+    int index_attaque = 0;
+    int index_objet = 0;
+    int message_timer = 0;
+    
+    sprintf(message_combat, "Combat contre %s!", mob->nom);
+    message_timer = 60;
+    
+    if (joueur.vitesse >= mob->vitesse) {
+        tour = 0;
+    } else {
+        tour = 1;
+    }
+    
+    while (gagnant != 1) {
+        SDL_Event e;
+        
+        if (message_timer > 0) {
+            message_timer--;
+        }
+        
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                gagnant = 1;
+                return;
+            }
+            
+            if (tour == 0 && message_timer == 0) {
+                if (e.type == SDL_KEYDOWN) {
+                    if (menu_actif == 0) {
+                        if (e.key.keysym.sym == SDLK_UP) {
+                            index_menu--;
+                            if (index_menu < 0) index_menu = 2;
+                        }
+                        if (e.key.keysym.sym == SDLK_DOWN) {
+                            index_menu++;
+                            if (index_menu > 2) index_menu = 0;
+                        }
+                        if (e.key.keysym.sym == SDLK_RETURN) {
+                            if (index_menu == 0) {
+                                menu_actif = 1;
+                                index_attaque = 0;
+                            }
+                            if (index_menu == 1) {
+                                menu_actif = 2;
+                                index_objet = 0;
+                            }
+                            if (index_menu == 2) {
+                                sprintf(message_combat, "Vous avez fui le combat!");
+                                message_timer = 60;
+                                mob->pv = mob->pv_max;
+                                gagnant = 1;
+                            }
+                        }
+                    }
+                    
+                    if (menu_actif == 1) {
+                        if (e.key.keysym.sym == SDLK_UP) {
+                            index_attaque--;
+                            if (index_attaque < 0) index_attaque = 3;
+                        }
+                        if (e.key.keysym.sym == SDLK_DOWN) {
+                            index_attaque++;
+                            if (index_attaque > 3) index_attaque = 0;
+                        }
+                        if (e.key.keysym.sym == SDLK_RETURN) {
+                            int degats_base[] = {5, 7, 10, 15};
+                            int degats = degats_base[index_attaque] + joueur.force - mob->defense;
+                            if (degats < 1) degats = 1;
+                            mob->pv -= degats;
+                            
+                            const char* noms_attaques[] = {"Coup de Poing", "Coup d'Harpon", "Jet de Filet", "Attaque Vague"};
+                            sprintf(message_combat, "%s inflige %d degats!", noms_attaques[index_attaque], degats);
+                            message_timer = 60;
+                            
+                            if (mob->pv <= 0) {
+                                mob->pv = 0;
+                                sprintf(message_combat, "Victoire! Vous obtenez: %s", mob->recompense);
+                                message_timer = 120;
+                                gagnant = 1;
+                            } else {
+                                tour = 1;
+                            }
+                            menu_actif = 0;
+                        }
+                        if (e.key.keysym.sym == SDLK_ESCAPE) {
+                            menu_actif = 0;
+                        }
+                    }
+                    
+                    if (menu_actif == 2) {
+                        if (e.key.keysym.sym == SDLK_UP) {
+                            index_objet--;
+                            if (index_objet < 0) index_objet = 2;
+                        }
+                        if (e.key.keysym.sym == SDLK_DOWN) {
+                            index_objet++;
+                            if (index_objet > 2) index_objet = 0;
+                        }
+                        if (e.key.keysym.sym == SDLK_RETURN) {
+                            if (index_objet == 0) {
+                                joueur.pv += 30;
+                                if (joueur.pv > joueur.pv_max) joueur.pv = joueur.pv_max;
+                                sprintf(message_combat, "Vous recuperez 30 PV!");
+                            }
+                            if (index_objet == 1) {
+                                joueur.pv += 50;
+                                if (joueur.pv > joueur.pv_max) joueur.pv = joueur.pv_max;
+                                sprintf(message_combat, "Vous recuperez 50 PV!");
+                            }
+                            if (index_objet == 2) {
+                                joueur.force += 5;
+                                sprintf(message_combat, "Votre force augmente de 5!");
+                            }
+                            message_timer = 60;
+                            tour = 1;
+                            menu_actif = 0;
+                        }
+                        if (e.key.keysym.sym == SDLK_ESCAPE) {
+                            menu_actif = 0;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (tour == 1 && gagnant != 1 && message_timer == 0) {
+            int choix = rand() % 4;
+            int degats_base[] = {6, 8, 10, 12};
+            int degats = degats_base[choix] + mob->attaque - joueur.defense;
+            if (degats < 1) degats = 1;
+            joueur.pv -= degats;
+            
+            sprintf(message_combat, "%s vous inflige %d degats!", mob->nom, degats);
+            message_timer = 60;
+            
+            if (joueur.pv <= 0) {
+                joueur.pv = 0;
+                sprintf(message_combat, "Defaite...");
+                message_timer = 120;
+                gagnant = 1;
+            } else {
+                tour = 0;
+            }
+        }
+        
+        SDL_SetRenderDrawColor(renderer, 135, 206, 235, 255);
+        SDL_RenderClear(renderer);
+        
+        int x = SCREEN_WIDTH / 2 - 80;
+        int y = 80;
+        dessiner_rectangle(x, y, 160, 160, 139, 0, 0, 255);
+        dessiner_rectangle(x + 40, y + 40, 20, 20, 255, 255, 255, 255);
+        dessiner_rectangle(x + 100, y + 40, 20, 20, 255, 255, 255, 255);
+        dessiner_rectangle(x + 45, y + 45, 10, 10, 0, 0, 0, 255);
+        dessiner_rectangle(x + 105, y + 45, 10, 10, 0, 0, 0, 255);
+        dessiner_rectangle(x + 60, y + 100, 40, 10, 0, 0, 0, 255);
+        dessiner_bordure(x, y, 160, 160, 0, 0, 0);
+        
+        SDL_Color blanc = {255, 255, 255, 255};
+        dessiner_texte(mob->nom, SCREEN_WIDTH - 210, 30, blanc);
+        dessiner_rectangle(SCREEN_WIDTH - 220, 20, 200, 80, 0, 0, 0, 200);
+        dessiner_barre_vie(SCREEN_WIDTH - 210, 60, mob->pv, mob->pv_max, 180);
+        
+        int interface_y = SCREEN_HEIGHT - 200;
+        dessiner_rectangle(0, interface_y, SCREEN_WIDTH, 200, 240, 240, 240, 255);
+        dessiner_bordure(0, interface_y, SCREEN_WIDTH, 200, 0, 0, 0);
+        
+        if (menu_actif == 0) {
+            int menu_x = 50;
+            int menu_y = interface_y + 30;
+            int espacement = 50;
+            
+            SDL_Color noir = {0, 0, 0, 255};
+            
+            if (index_menu == 0) {
+                dessiner_rectangle(menu_x - 10, menu_y - 5, 150, 40, 255, 200, 0, 255);
+            }
+            dessiner_rectangle(menu_x, menu_y, 130, 30, 200, 50, 50, 255);
+            dessiner_bordure(menu_x, menu_y, 130, 30, 0, 0, 0);
+            dessiner_texte("ATTAQUE", menu_x + 10, menu_y + 5, blanc);
+            
+            menu_y += espacement;
+            if (index_menu == 1) {
+                dessiner_rectangle(menu_x - 10, menu_y - 5, 150, 40, 255, 200, 0, 255);
+            }
+            dessiner_rectangle(menu_x, menu_y, 130, 30, 50, 100, 200, 255);
+            dessiner_bordure(menu_x, menu_y, 130, 30, 0, 0, 0);
+            dessiner_texte("OBJET", menu_x + 10, menu_y + 5, blanc);
+            
+            menu_y += espacement;
+            if (index_menu == 2) {
+                dessiner_rectangle(menu_x - 10, menu_y - 5, 150, 40, 255, 200, 0, 255);
+            }
+            dessiner_rectangle(menu_x, menu_y, 130, 30, 100, 100, 100, 255);
+            dessiner_bordure(menu_x, menu_y, 130, 30, 0, 0, 0);
+            dessiner_texte("FUITE", menu_x + 10, menu_y + 5, blanc);
+            
+            dessiner_rectangle(SCREEN_WIDTH - 250, interface_y + 30, 230, 60, 0, 0, 0, 200);
+            dessiner_barre_vie(SCREEN_WIDTH - 240, interface_y + 50, joueur.pv, joueur.pv_max, 210);
+        }
+        
+        if (menu_actif == 1) {
+            const char* noms_attaques[] = {"Coup de Poing", "Coup d'Harpon", "Jet de Filet", "Attaque Vague"};
+            int menu_x = 50;
+            int menu_y = interface_y + 20;
+            SDL_Color noir = {0, 0, 0, 255};
+            
+            for (int i = 0; i < 4; i++) {
+                if (i == index_attaque) {
+                    dessiner_rectangle(menu_x - 10, menu_y - 5, 350, 35, 255, 200, 0, 255);
+                }
+                dessiner_rectangle(menu_x, menu_y, 330, 25, 200, 100, 100, 255);
+                dessiner_bordure(menu_x, menu_y, 330, 25, 0, 0, 0);
+                dessiner_texte(noms_attaques[i], menu_x + 10, menu_y + 2, noir);
+                menu_y += 35;
+            }
+        }
+        
+        if (menu_actif == 2) {
+            const char* noms_objets[] = {"Potion (+30 PV)", "Super Potion (+50 PV)", "Boost Force (+5)"};
+            int menu_x = 50;
+            int menu_y = interface_y + 20;
+            SDL_Color noir = {0, 0, 0, 255};
+            
+            for (int i = 0; i < 3; i++) {
+                if (i == index_objet) {
+                    dessiner_rectangle(menu_x - 10, menu_y - 5, 350, 35, 255, 200, 0, 255);
+                }
+                dessiner_rectangle(menu_x, menu_y, 330, 25, 100, 200, 100, 255);
+                dessiner_bordure(menu_x, menu_y, 330, 25, 0, 0, 0);
+                dessiner_texte(noms_objets[i], menu_x + 10, menu_y + 2, noir);
+                menu_y += 35;
+            }
+        }
+        
+        if (message_timer > 0) {
+            dessiner_rectangle(SCREEN_WIDTH/2 - 250, SCREEN_HEIGHT/2 - 40, 500, 80, 0, 0, 0, 230);
+            dessiner_bordure(SCREEN_WIDTH/2 - 250, SCREEN_HEIGHT/2 - 40, 500, 80, 255, 255, 0);
+            SDL_Color jaune = {255, 255, 0, 255};
+            dessiner_texte(message_combat, SCREEN_WIDTH/2 - 240, SCREEN_HEIGHT/2 - 25, jaune);
+        }
+        
+        SDL_RenderPresent(renderer);
+        SDL_Delay(16);
+    }
+}
+
+void verifier_collision_mob() {
+    if (joueur.x == 10 && joueur.y == 7) {
+        mob_actif = 0;
+        lancer_combat(0);
+    }
+    
+    if (joueur.x == 15 && joueur.y == 10) {
+        mob_actif = 1;
+        lancer_combat(1);
+    }
+}
+
+void game_loop() {
+    bool running = true;
+    SDL_Event e;
+    
+    while (running) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                running = false;
+            }
+            
+            gerer_input_map(&e);
+            verifier_collision_mob();
+        }
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        
+        dessiner_map();
+        
+        SDL_RenderPresent(renderer);
+        SDL_Delay(16);
+    }
+}
+
+int main(int argc, char* argv[]) {
+    srand(time(NULL));
+    
+    init_sdl();
+    init_joueur();
+    init_mobs();
+    init_tableaux();
+    
+    game_loop();
+    
+    TTF_CloseFont(font);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
+    
+    return 0;
+}
