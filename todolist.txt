@@ -1,5 +1,19 @@
-patch les mouvements des ennemeis
-ajouter plusieurs ennemeis
-avoir une caméra qui suit le joueur
-pouvoir aller dans plusieurs niveaux
-pouvoir obtenir des objets via des pnjs ou des actions
+Scènes & switch (Hub/Explo/Death)
+
+Caméra follow + clamp + culling
+
+levels.json route bien les transitions
+
+Audio BGM par scène (play/stop)
+
+Inventory + pickup “E”
+
+Menu PNJ (invite + navigation)
+
+Shop minimal (buy)
+
+Ally minimal (suit + tape)
+
+Données chargées depuis JSON (items/shops/levels/npcs)
+
+Plugin ennemi exemple chargé en explo
