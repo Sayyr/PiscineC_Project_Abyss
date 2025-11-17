@@ -8,14 +8,14 @@ static const int TILE = 32;
 
 // Carte HUB (12x8) : M = marchand, R = recruteur, D = départ (descendre), J = PNJ
 static const char HUB_MAP[] =
-"#############"
-"#..M.......J#"
-"#....#.#....#"
-"#R...#D#....#"
-"#....###....#"
-"#...........#"
-"#...........#"
-"#############";
+"############"
+"#..M.......#"
+"#....#.#...#"
+"#R...#D#...#"
+"#....###...#"
+"#..........#"
+"#..........#"
+"############";
 
 static int is_wall(const Hub* s, int tx, int ty) {
     if (tx < 0 || ty < 0 || tx >= s->w || ty >= s->h) return 1;
