@@ -31,7 +31,14 @@ static char tile_at(const Hub* s, int tx, int ty) {
 static HubUi detect_panel(const Hub* s, float px, float py) {
     int tx = (int)(px / TILE);
     int ty = (int)(py / TILE);
-    // On regarde la tuile "devant" le joueur au sens large (4 directions)
+
+    // D'abord vérifier la tuile actuelle
+    char here = tile_at(s, tx, ty);
+    if (here == 'M') return HUB_UI_MERCHANT;
+    if (here == 'R') return HUB_UI_RECRUITER;
+    if (here == 'D') return HUB_UI_DEPART;
+
+    // Puis regarder autour
     const int around[4][2] = { {+1,0},{-1,0},{0,+1},{0,-1} };
     for (int i=0;i<4;i++){
         int nx = tx + around[i][0], ny = ty + around[i][1];
@@ -42,6 +49,7 @@ static HubUi detect_panel(const Hub* s, float px, float py) {
     }
     return HUB_UI_NONE;
 }
+
 
 void hub_enter(Game* g, Hub** ps) {
     (void)g;
@@ -75,11 +83,6 @@ void hub_update(Game* g, Hub* s, float dt) {
         } else if (ks[SDL_SCANCODE_3]) {
             SDL_Log("[HUB] Choix 3 dans menu %d", s->ui);
         }
-        // Départ : dès qu'on ouvre et qu'on appuie '1' par ex., on peut transiter
-        if (s->ui == HUB_UI_DEPART && ks[SDL_SCANCODE_1]) {
-            game_change_state(g, GS_EXPLORATION);
-            return;
-        }
         if (ks[SDL_SCANCODE_ESCAPE]) {
             s->ui = HUB_UI_NONE; // fermer le panneau
         }
@@ -103,14 +106,21 @@ void hub_update(Game* g, Hub* s, float dt) {
     tx = (int)(s->x / TILE); ty = (int)(ny / TILE);
     if (!is_wall(s, tx, ty)) s->y = ny;
 
-    // --- Ouverture d'un panneau si 'E' près d'un hotspot ---
     if (ks[SDL_SCANCODE_E]) {
-        HubUi near = detect_panel(s, s->x, s->y);
-        if (near != HUB_UI_NONE) {
-            s->ui = near; // ouvre le menu correspondant
-            SDL_Log("[HUB] Ouverture menu %d (1/2/3 pour choisir, ESC pour fermer)", s->ui);
-        }
+    HubUi near = detect_panel(s, s->x, s->y);
+
+    // Si c'est la case de départ, on switche direct vers l'exploration
+    if (near == HUB_UI_DEPART) {
+        game_change_state(g, GS_EXPLORATION);
+        return;
     }
+
+    // Sinon, on ouvre le menu (marchand / recruteur)
+    if (near != HUB_UI_NONE) {
+        s->ui = near; // ouvre le menu correspondant
+        SDL_Log("[HUB] Ouverture menu %d (1/2/3 pour choisir, ESC pour fermer)", s->ui);
+    }
+}
 }
 
 static void draw_rect(SDL_Renderer* r, int x, int y, int w, int h, int R, int G, int B) {
