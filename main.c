@@ -16,7 +16,6 @@ int main(int argc, char* argv[]) {
     const double freq = (double)SDL_GetPerformanceFrequency();
 
     while (g.running) {
-        // dt
         Uint64 now = SDL_GetPerformanceCounter();
         float dt = (float)((now - last) / freq);
         if (dt > 0.25f) dt = 0.25f;
@@ -28,38 +27,25 @@ int main(int argc, char* argv[]) {
             if (e.type == SDL_QUIT) g.running = false;
         }
 
-        // UPDATE selon l'état courant
-        switch (g.state) {
-            case GS_HUB:         hub_update(&g, g.hub, dt);       break;
-            case GS_EXPLORATION: explo_update(&g, g.explo, dt);   break;
-            case GS_COMBAT:      fight_update(&g, g.fight, dt); break;
-        }
-
-        // TRANSITION centralisée (leave -> enter)
-        if (g.next_state != g.state) {
-            switch (g.state) {
-                case GS_HUB:         hub_leave(&g, &g.hub);       break;
-                case GS_EXPLORATION: explo_leave(&g, &g.explo);   break;
-                case GS_COMBAT:      fight_leave(&g, &g.fight); break;
-            }
-            g.state = g.next_state;
-            switch (g.state) {
-                case GS_HUB:         hub_enter(&g, &g.hub);       break;
-                case GS_EXPLORATION: explo_enter(&g, &g.explo);   break;
-                case GS_COMBAT:      fight_enter(&g, &g.fight); break;
-            }
-        }
+        // UPDATE + TRANSITIONS (centralisé dans game.c)
+        game_step(&g, dt);
 
         // RENDER
         switch (g.state) {
-            case GS_HUB:         hub_render(&g, g.hub);       break;
-            case GS_EXPLORATION: explo_render(&g, g.explo);   break;
-            case GS_COMBAT:      fight_render(&g, g.fight); break;
+            case GS_HUB:
+                hub_render(&g, g.hub);
+                break;
+            case GS_EXPLORATION:
+                explo_render(&g, g.explo);
+                break;
+            case GS_COMBAT:
+                fight_render(&g, g.fight);
+                break;
         }
         SDL_RenderPresent(g.ren);
     }
 
-    // leave propre de l'état courant (si besoin)
+    // leave propre de l'état courant (c'est la propreté comme ça)
     switch (g.state) {
         case GS_HUB:         hub_leave(&g, &g.hub);       break;
         case GS_EXPLORATION: explo_leave(&g, &g.explo);   break;

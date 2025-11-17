@@ -8,21 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void hub_enter(Game* g);
-void hub_leave(Game* g);
-void hub_update(Game* g, float dt);
-void hub_render(Game* g);
-
-void explo_enter(Game* g);
-void explo_leave(Game* g);
-void explo_update(Game* g, float dt);
-void explo_render(Game* g);
-
-void fight_enter(Game* g);
-void fight_leave(Game* g);
-void fight_update(Game* g, float dt);
-void fight_render(Game* g);
-
 static void game_apply_state_change(Game* g) {
     if (g->next_state == g->state) return;
 
@@ -30,21 +15,20 @@ static void game_apply_state_change(Game* g) {
     switch (g->state) {
         case GS_HUB:
             if (g->hub) {
-                hub_leave(g);
+                hub_leave(g, &g->hub);
                 // leave devrait free sinon brutforce :
-                // free(g->hub);
                 g->hub = NULL;
             }
             break;
         case GS_EXPLORATION:
             if (g->explo) {
-                explo_leave(g);
+                explo_leave(g, &g->explo);
                 g->explo = NULL;
             }
             break;
         case GS_COMBAT:
             if (g->fight) {
-                fight_leave(g);
+                fight_leave(g, &g->fight);
                 g->fight = NULL;
             }
             break;
@@ -55,9 +39,9 @@ static void game_apply_state_change(Game* g) {
 
     // 3) entrer dans le nouvel état
     switch (g->state) {
-        case GS_HUB:         hub_enter(g);   break;
-        case GS_EXPLORATION: explo_enter(g); break;
-        case GS_COMBAT:      fight_enter(g); break;
+        case GS_HUB:         hub_enter  (g, &g->hub)  ; break;
+        case GS_EXPLORATION: explo_enter(g, &g->explo); break;
+        case GS_COMBAT:      fight_enter(g, &g->fight); break;
     }
 }
 
@@ -72,6 +56,22 @@ bool game_init(Game* g, const char* title, int w, int h) {
     g->next_state= GS_HUB;
     g->hub = NULL; g->explo = NULL; g->fight = NULL; // alloués par les enter()
     return true;
+}
+
+void game_step(Game* g, float dt){
+    switch (g->state)
+    {
+    case GS_HUB:
+        hub_update(g, g->hub, dt);
+        break;
+    case GS_EXPLORATION:
+        explo_update(g, g->explo, dt);
+        break;
+    case GS_COMBAT:
+        fight_update(g, g->fight, dt);
+        break;    
+    }
+    game_apply_state_change(g);
 }
 
 void game_shutdown(Game* g) {
