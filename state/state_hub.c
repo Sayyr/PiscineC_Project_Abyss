@@ -8,14 +8,14 @@ static const int TILE = 32;
 
 // Carte HUB (12x8) : M = marchand, R = recruteur, D = départ (descendre), J = PNJ
 static const char HUB_MAP[] =
-"############"
-"#..M......D#"
-"#..........#"
-"#....##....#"
-"#....##....#"
-"#..R.......#"
-"#..........#"
-"############";
+"#############"
+"#..M.......J#"
+"#....#.#....#"
+"#R...#D#....#"
+"#....###....#"
+"#...........#"
+"#...........#"
+"#############";
 
 static int is_wall(const Hub* s, int tx, int ty) {
     if (tx < 0 || ty < 0 || tx >= s->w || ty >= s->h) return 1;
@@ -78,6 +78,7 @@ void hub_update(Game* g, Hub* s, float dt) {
         // Départ : dès qu'on ouvre et qu'on appuie '1' par ex., on peut transiter
         if (s->ui == HUB_UI_DEPART && ks[SDL_SCANCODE_1]) {
             game_change_state(g, GS_EXPLORATION);
+            return;
         }
         if (ks[SDL_SCANCODE_ESCAPE]) {
             s->ui = HUB_UI_NONE; // fermer le panneau
