@@ -28,3 +28,4 @@ static inline void game_change_state(Game* g, GameState ns) { g->next_state = ns
 
 bool game_init(Game* g, const char* title, int w, int h);
 void game_shutdown(Game* g);
+void game_step(Game* g, float dt);
