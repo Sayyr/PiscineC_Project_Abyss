@@ -59,6 +59,18 @@ void explo_leave(Game* g, Explo** ps) {
     free(*ps); *ps = NULL;
 }
 
+static int player_enemy_collide(const Player* p, const Enemy* e) {
+    // Rayon du joueur
+    const float pr = 12.0f;
+    const float er = 12.0f;
+
+    float dx = p->x - e->x;
+    float dy = p->y - e->y;
+    float dist2 = dx*dx + dy*dy;
+    float r = pr + er;
+    return dist2 <= r*r;
+}
+
 void explo_update(Game* g, Explo* s, float dt) {
     const Uint8* ks = SDL_GetKeyboardState(NULL);
 
@@ -80,15 +92,15 @@ void explo_update(Game* g, Explo* s, float dt) {
     ty = (int)(ny / 32.0f);
     if (!map_is_wall(&s->map, tx, ty)) s->player.y = ny;
 
-    // Mise à jour des ennemis
+    // update ennemies
     for (int i = 0; i < s->enemy_count; ++i)
         enemy_update(&s->ennemies[i], (Map*)&s->map, (Player*)&s->player);
 
-    // collision/combat state change
+    // collision state change
     for (int i = 0; i < s->enemy_count; ++i) {
         Enemy* e = &s->ennemies[i];
         if (player_enemy_collide(&s->player, e)) {
-            SDL_Log("Combat!");
+            SDL_Log("Combat!\n");
             game_change_state(g, GS_COMBAT);
             return; // out of state_explo
         }

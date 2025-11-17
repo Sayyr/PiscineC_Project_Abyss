@@ -114,7 +114,7 @@ static void enemy_update_default(Enemy* e, const Map* map, const Player* player)
     float pdy = player->y - e->y;
     float pdist = sqrtf(pdx*pdx + pdy*pdy);
     if (pdist < 24.0f) {
-        printf("attaque!\n"); //ajouter la mécanique de combats en tour par tour plus tard
+        printf("Combat?\n"); //ajouter la mécanique de combats en tour par tour plus tard
     }
 }
 
