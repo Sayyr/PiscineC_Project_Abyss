@@ -19,6 +19,8 @@ typedef struct Explo {
     Player player;
     Enemy      ennemies[4];
     int        enemy_count;
+
+    int engaged_enemy;
 } Explo;
 
 void explo_enter (Game* g, Explo** ps);

@@ -147,6 +147,12 @@ void enemy_init(Enemy* e, float x, float y) {
     e->state = WANDER;
 }
 
+void enemy_init_from_creature(Enemy* e, float x, float y, const MarineCreature* c) {
+    enemy_init(e, x, y);
+    e->creature = *c;
+    e->hp = c->current_health;
+}
+
 void enemy_update(Enemy* e, const Map* map, const Player* player) {
     if (e->vtable && e->vtable->update)
         e->vtable->update(e, map, player);

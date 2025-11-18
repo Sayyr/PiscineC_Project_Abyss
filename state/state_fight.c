@@ -1,13 +1,27 @@
 #include "state_fight.h"
+#include "state_explo.h"
+#include "../include/creatures.h"
+#include "render/render_fight.h"
 #include <../../include/SDL2/SDL.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "render/render_fight.h"
 
 void fight_enter(Game* g, Fight** ps) {
     (void)g;
     if (!*ps) *ps = (Fight*)calloc(1, sizeof(Fight));
     Fight* s = *ps;
+
+    Explo* ex = g->explo;
+    int idx = ex->engaged_enemy;
+    if (idx < 0 || idx >= ex->enemy_count) {
+        // fallback : pas d’ennemi trouvé -> retour hub par sécurité parce que retour explo nous piège dans une boucle
+        // exlpo>fight>explo>fight>etc..
+        game_change_state(g, GS_HUB);
+        return;
+    }
+
+    Enemy* e = &ex->ennemies[idx];
+    MarineCreature* mc = &e->creature;
 
     // TODO plus tard : prendre les vraies stats depuis g->explo->player, et l’Enemy qui a touché
     s->joueur_pv      = 100;
@@ -17,13 +31,15 @@ void fight_enter(Game* g, Fight** ps) {
     s->joueur_defense = 5;
 
     // Pour l’instant, on prend toujours le même mob (à ajouter le mob en param depuis explo)
-    strcpy(s->mob_nom,         "3arbi Normal");
-    s->mob_pv       = 50;
-    s->mob_pv_max   = 50;
-    s->mob_vitesse  = 6;
-    s->mob_attaque  = 8;
-    s->mob_defense  = 3;
+    s->mob_pv_max   = mc->max_health;
+    s->mob_pv       = mc->current_health;
+    s->mob_attaque  = (mc->attack_min + mc->attack_max) / 2; // ou stocke min/max
+    s->mob_defense  = mc->defense;
+    s->mob_vitesse  = mc->speed;
     strcpy(s->mob_recompense,  "20 pieces d'or");
+
+    strncpy(s->mob_nom, mc->name, sizeof(s->mob_nom));
+    s->mob_nom[sizeof(s->mob_nom)-1] = '\0';
 
     // Init du round : qui commence ?
     s->gagnant       = 0;
@@ -37,6 +53,8 @@ void fight_enter(Game* g, Fight** ps) {
     } else {
         s->round = 1; // mob
     }
+
+    // s->round         = (s->joueur_vitesse >= s->mob_vitesse) ? 0 : 1;
 
     snprintf(s->message, sizeof(s->message), "Combat contre %s!\n", s->mob_nom);
     s->message_timer = 60;

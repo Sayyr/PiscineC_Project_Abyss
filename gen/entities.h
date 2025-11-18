@@ -2,7 +2,8 @@
 #include <include/SDL2/SDL.h>
 #include "map.h"
 #include "player.h"
-#include "state/render/render_common.h"
+#include "../state/render/render_common.h"
+#include "../include/creatures.h"
 
 typedef enum { WANDER, TRAQUE, SEARCH } EnemyState;
 
@@ -22,6 +23,8 @@ typedef struct Enemy {
 
     const EnemyVTable* vtable;
     Inventory inv;
+
+    MarineCreature creature;
 } Enemy;
 
 struct EnemyVTable {
@@ -34,7 +37,7 @@ typedef struct Chest {
     int opened;
 } Chest;
 
-void enemy_init  (Enemy* e, float x, float y);
+void enemy_init_from_creature(Enemy* e, float x, float y, const MarineCreature* c);
 void enemy_update(Enemy* e, const Map* map, const Player* player);
 void enemy_render(Enemy* e, SDL_Renderer* ren);
 void enemy_wander(Enemy* e, const Map* map);

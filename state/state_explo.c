@@ -1,5 +1,6 @@
 #include "render_explo.h"
 #include "state_explo.h"
+#include "../include/creatures.h"
 #include <time.h>
 #include <../../include/SDL2/SDL.h>
 #include <stdlib.h>
@@ -38,9 +39,18 @@ void explo_enter(Game* g, Explo** ps) {
 
     (*ps)->player.x = 64;
     (*ps)->player.y = 64;
+    (*ps)->engaged_enemy = -1;
 
-    // Spawn des ennemis
-    (*ps)->enemy_count = 4;
+    // === Génération des créatures de combat par juju ===
+    MarineCreature pool[MAX_CREATURES];
+    int count = 0;
+    int depth = 50; // param selon le niveau de la map
+    creatures_generate(pool, &count, depth);
+
+    if (count > 4) count = 4;
+    (*ps)->enemy_count = count;
+
+    // === Spawn des Enemy en utilisant les créatures générées ===
     for (int i = 0; i < (*ps)->enemy_count; ++i) {
         int tx, ty;
         do {
@@ -50,7 +60,7 @@ void explo_enter(Game* g, Explo** ps) {
                                  (*ps)->player.x, (*ps)->player.y));
         float ex = tx * 32 + 16;
         float ey = ty * 32 + 16;
-        enemy_init(&(*ps)->ennemies[i], ex, ey);
+        enemy_init_from_creature(&(*ps)->ennemies[i], ex, ey, &pool[i]);
     }
 }
 
@@ -101,6 +111,7 @@ void explo_update(Game* g, Explo* s, float dt) {
         Enemy* e = &s->ennemies[i];
         if (player_enemy_collide(&s->player, e)) {
             SDL_Log("Combat!\n");
+            s->engaged_enemy = i;
             game_change_state(g, GS_COMBAT);
             return; // out of state_explo
         }
