@@ -1,4 +1,6 @@
 #include "render_common.h"
+
+
 void draw_rect(SDL_Renderer* r,int x,int y,int w,int h,int R,int G,int B){
     SDL_Rect rr={x,y,w,h}; SDL_SetRenderDrawColor(r,R,G,B,255); SDL_RenderFillRect(r,&rr);
 }

@@ -1,4 +1,5 @@
 #include "map.h"
+// #include "player/player.h"
 #include <math.h>
 
 bool map_is_wall(const Map* m, int tx, int ty) {
@@ -31,3 +32,5 @@ bool has_line_of_sight(const Map* map, float x0f, float y0f, float x1f, float y1
     }
     return true;
 }
+
+// TODO : ajouter ce que juju à fait

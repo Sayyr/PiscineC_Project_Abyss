@@ -1,26 +1,101 @@
 #include "state_fight.h"
 #include <../../include/SDL2/SDL.h>
 #include <stdlib.h>
+#include "render/render_fight.h"
 
 void fight_enter(Game* g, Fight** ps) {
     (void)g;
     if (!*ps) *ps = (Fight*)calloc(1, sizeof(Fight));
-    (*ps)->round = 1;
+    Fight* s = *ps;
+
+    // TODO plus tard : prendre les vraies stats depuis g->explo->player, et l’Enemy qui a touché
+    s->joueur_pv      = 100;
+    s->joueur_pv_max  = 100;
+    s->joueur_vitesse = 8;
+    s->joueur_force   = 10;
+    s->joueur_defense = 5;
+
+    // Pour l’instant, on prend toujours le même mob (à ajouter le mob en param depuis explo)
+    strcpy(s->mob_nom,         "3arbi Normal");
+    s->mob_pv       = 50;
+    s->mob_pv_max   = 50;
+    s->mob_vitesse  = 6;
+    s->mob_attaque  = 8;
+    s->mob_defense  = 3;
+    strcpy(s->mob_recompense,  "20 pieces d'or");
+
+    // Init du round : qui commence ?
+    s->gagnant       = 0;
+    s->menu_actif    = 0;
+    s->index_menu    = 0;
+    s->index_attaque = 0;
+    s->index_objet   = 0;
+
+    if (s->joueur_vitesse >= s->mob_vitesse) {
+        s->round = 0; // joueur
+    } else {
+        s->round = 1; // mob
+    }
+
+    snprintf(s->message, sizeof(s->message), "Combat contre %s!", s->mob_nom);
+    s->message_timer = 60;
 }
 void fight_leave(Game* g, Fight** ps) {
     (void)g;
     free(*ps); *ps = NULL;
 }
 void fight_update(Game* g, Fight* s, float dt) {
-    (void)s; (void)dt;
+    (void)dt;
+    SDL_Event e;
     const Uint8* ks = SDL_GetKeyboardState(NULL);
-    // Debug: V = victoire (retour explo), L = défaite (retour hub)
-    if (ks[SDL_SCANCODE_V]) game_change_state(g, GS_EXPLORATION);
-    if (ks[SDL_SCANCODE_L]) game_change_state(g, GS_HUB);
+
+    // décrémenter le timer de message
+    if (s->message_timer > 0) {
+        s->message_timer--;
+    }
+    // input
+    while (SDL_PollEvent(&e)) {
+        if (e.type == SDL_QUIT) {
+            g->running = false;
+            return;
+        }
+        // Debug: V = victoire (retour explo), L = défaite (retour hub)
+        if (ks[SDL_SCANCODE_V]) game_change_state(g, GS_EXPLORATION);
+        if (ks[SDL_SCANCODE_L]) game_change_state(g, GS_HUB);
+
+        // si combat fini, une touche pour sortir (temporaire)
+        if (s->gagnant == 1 && e.type == SDL_KEYDOWN) {
+            game_change_state(g, GS_EXPLORATION); // ou GS_HUB etc.
+            return;
+        }
+        // j'ai gardé ta logique que t'avais fait mais je l'ai adapté au projet
+    }
+
+    // 2) round de l'ennemi (quand message_timer == 0, gagnant pas 1, round == 1)
+    if (s->round == 1 && s->gagnant != 1 && s->message_timer == 0) {
+        // logique de l’attaque du mob (copier/coller et adapter du proto)
+        int choix = rand() % 4;
+        int degats_base[] = {6, 8, 10, 12};
+        int degats = degats_base[choix] + s->mob_attaque - s->joueur_defense;
+        if (degats < 1) degats = 1;
+        s->joueur_pv -= degats;
+
+        snprintf(s->message, sizeof(s->message),
+                 "%s vous inflige %d degats!", s->mob_nom, degats);
+        s->message_timer = 60;
+
+        if (s->joueur_pv <= 0) {
+            s->joueur_pv = 0;
+            snprintf(s->message, sizeof(s->message), "Defaite...");
+            s->message_timer = 120;
+            s->gagnant = 1;
+            // game_change_state(g, GS_HUB); en com pour debug
+        } else {
+            s->round = 0;
+        }
+    }
 }
+
 void fight_render(Game* g, Fight* s) {
-    (void)s;
-    SDL_SetRenderDrawColor(g->ren, 20, 10, 10, 255);
-    SDL_RenderClear(g->ren);
-    // (dessiner UI de combat plus tard)
+    render_fight(g->ren, s);
 }
