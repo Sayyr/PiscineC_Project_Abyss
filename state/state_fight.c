@@ -1,6 +1,7 @@
 #include "state_fight.h"
 #include <../../include/SDL2/SDL.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "render/render_fight.h"
 
 void fight_enter(Game* g, Fight** ps) {
