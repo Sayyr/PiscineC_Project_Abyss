@@ -11,8 +11,11 @@
 static void game_apply_state_change(Game* g) {
     if (g->next_state == g->state) return;
 
+    GameState old = g->state;
+    GameState new = g->next_state;
+
     // 1) quitter l’état courant
-    switch (g->state) {
+    switch (old) {
         case GS_HUB:
             if (g->hub) {
                 hub_leave(g, &g->hub);
@@ -21,21 +24,22 @@ static void game_apply_state_change(Game* g) {
             }
             break;
         case GS_EXPLORATION:
+        
             if (g->explo) {
                 explo_leave(g, &g->explo);
                 g->explo = NULL;
             }
             break;
         case GS_COMBAT:
-            if (g->fight) {
-                fight_leave(g, &g->fight);
-                g->fight = NULL;
+            if (new != GS_COMBAT && g->explo) {
+                explo_leave(g, &g->explo);
+                g->explo = NULL;
             }
             break;
     }
 
     // 2) basculer
-    g->state = g->next_state;
+    g->state = new;
 
     // 3) entrer dans le nouvel état
     switch (g->state) {
