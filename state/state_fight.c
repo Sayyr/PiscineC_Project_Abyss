@@ -8,6 +8,8 @@
 #include <string.h>
 
 void fight_enter(Game* g, Fight** ps) {
+    // debug
+    SDL_Log("fight_enter: debut, g->explo=%p", (void*)g->explo);
     (void)g;
     if (!*ps) *ps = (Fight*)calloc(1, sizeof(Fight));
     Fight* s = *ps;
@@ -66,6 +68,7 @@ void fight_leave(Game* g, Fight** ps) {
 }
 
 void fight_update(Game* g, Fight* s, float dt) {
+    SDL_Log("fight_enter: s=%p, mob_pv=%d", (void*)s, s->mob_pv);
     (void)dt;
     SDL_Event e;
     const Uint8* ks = SDL_GetKeyboardState(NULL);

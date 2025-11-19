@@ -110,7 +110,7 @@ void explo_update(Game* g, Explo* s, float dt) {
     for (int i = 0; i < s->enemy_count; ++i) {
         Enemy* e = &s->ennemies[i];
         if (player_enemy_collide(&s->player, e)) {
-            SDL_Log("Combat!\n");
+            SDL_Log("explo_update: collision avec ennemi %d, enemy_count=%d", i, s->enemy_count);
             s->engaged_enemy = i;
             game_change_state(g, GS_COMBAT);
             return; // out of state_explo
@@ -118,6 +118,7 @@ void explo_update(Game* g, Explo* s, float dt) {
     }
 
     // Transitions debug
+    
     if (ks[SDL_SCANCODE_X]) game_change_state(g, GS_COMBAT);
     if (ks[SDL_SCANCODE_R]) game_change_state(g, GS_HUB);
 }
