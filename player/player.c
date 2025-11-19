@@ -24,6 +24,11 @@ void player_tick_cooldowns(Player* p, float dt) {
 // static const AbilityDef* ability_def(AbilityId id); // depuis la “DB” (fichier)
 // static const ItemDef*    item_def(int item_id);     // idem
 
+void player_use_oxygen(Player* p, int amount) {
+    p->stats.oxygen -= amount;
+    if (p->stats.oxygen < 0) p->stats.oxygen = 0;
+}
+
 void player_apply_cmd(Player* p, const PlayerCmd* c, float dt) {
     // Mouvement horizontal
     float move = 0.0f;

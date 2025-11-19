@@ -5,6 +5,9 @@ typedef struct {
     float str, agi, psy;   // stats de base
     float max_hp, max_mp, max_ox;
     float atk, def, crit, move_speed; // dérivées
+    int oxygen;
+    int depth;
+    int pearls;
 } Stats;
 
 void stats_compute_derived(Stats* s);

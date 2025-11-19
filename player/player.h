@@ -33,3 +33,4 @@ void player_init(Player* p);
 void player_apply_cmd(Player* p, const PlayerCmd* cmd, float dt);
 void player_tick_cooldowns(Player* p, float dt);
 void player_learn_ability(Player* p, AbilityId id);
+void player_use_oxygen(Player* p, int amount);
