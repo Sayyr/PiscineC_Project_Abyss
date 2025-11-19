@@ -41,6 +41,9 @@ $(EXE): $(OBJ)
 run: $(EXE)
 	./$(EXE)
 
+debug: $(EXE)
+	gdb --args ./$(EXE)
+
 clean:
 	-$(RM) $(EXE) $(NULLDEV)
 	-$(RM) $(OBJ) $(NULLDEV)
