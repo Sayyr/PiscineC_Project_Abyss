@@ -33,7 +33,7 @@ static void game_apply_state_change(Game* g) {
         case GS_COMBAT:
             if (new != GS_COMBAT && g->explo) {
                 explo_leave(g, &g->explo);
-                // g->explo = NULL;
+                g->explo = NULL;
             }
             break;
     }
