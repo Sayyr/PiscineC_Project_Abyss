@@ -24,10 +24,11 @@ static void game_apply_state_change(Game* g) {
             }
             break;
         case GS_EXPLORATION:
-        
-            if (g->explo) {
-                explo_leave(g, &g->explo);
-                g->explo = NULL;
+            if (g->next_state != GS_COMBAT) {
+                if (g->explo) {
+                    explo_leave(g, &g->explo);
+                    g->explo = NULL;
+                }
             }
             break;
         case GS_COMBAT:
@@ -59,6 +60,7 @@ bool game_init(Game* g, const char* title, int w, int h) {
     g->state     = GS_HUB;
     g->next_state= GS_HUB;
     g->hub = NULL; g->explo = NULL; g->fight = NULL; // alloués par les enter()
+    g->combat_enemy_index = -1;
     return true;
 }
 

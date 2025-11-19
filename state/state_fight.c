@@ -9,13 +9,21 @@
 
 void fight_enter(Game* g, Fight** ps) {
     // debug
-    SDL_Log("fight_enter: debut, g->explo=%p", (void*)g->explo);
+    SDL_Log("fight_enter: debut, g->explo=%p\n", (void*)g->explo);
     (void)g;
     if (!*ps) *ps = (Fight*)calloc(1, sizeof(Fight));
     Fight* s = *ps;
 
     Explo* ex = g->explo;
+    if (!ex) {
+        SDL_Log("fight_enter: g->explo est NULL, retour hub\n");
+        game_change_state(g, GS_HUB);
+        return;
+    }
+
+
     int idx = ex->engaged_enemy;
+    SDL_Log("fight_enter: combat_enemy_index=%d, enemy_count=%d\n", idx, ex->enemy_count);
     if (idx < 0 || idx >= ex->enemy_count) {
         // fallback : pas d’ennemi trouvé -> retour hub par sécurité parce que retour explo nous piège dans une boucle
         // exlpo>fight>explo>fight>etc..
@@ -68,7 +76,7 @@ void fight_leave(Game* g, Fight** ps) {
 }
 
 void fight_update(Game* g, Fight* s, float dt) {
-    SDL_Log("fight_enter: s=%p, mob_pv=%d", (void*)s, s->mob_pv);
+    SDL_Log("fight_enter: s=%p, mob_pv=%d\n", (void*)s, s->mob_pv);
     (void)dt;
     SDL_Event e;
     const Uint8* ks = SDL_GetKeyboardState(NULL);

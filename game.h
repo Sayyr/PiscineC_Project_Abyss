@@ -21,6 +21,8 @@ typedef struct {
     Hub*    hub;
     Explo*  explo;
     Fight* fight;
+
+    int combat_enemy_index;
 } Game;
 
 // Transition à demander depuis un état (jamais modifier Game.state directement)

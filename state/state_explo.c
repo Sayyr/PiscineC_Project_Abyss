@@ -110,8 +110,9 @@ void explo_update(Game* g, Explo* s, float dt) {
     for (int i = 0; i < s->enemy_count; ++i) {
         Enemy* e = &s->ennemies[i];
         if (player_enemy_collide(&s->player, e)) {
-            SDL_Log("explo_update: collision avec ennemi %d, enemy_count=%d", i, s->enemy_count);
+            SDL_Log("explo_update: collision avec ennemi %d, enemy_count=%d\n", i, s->enemy_count);
             s->engaged_enemy = i;
+            g->combat_enemy_index = i;
             game_change_state(g, GS_COMBAT);
             return; // out of state_explo
         }
